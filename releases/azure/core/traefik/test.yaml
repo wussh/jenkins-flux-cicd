@@ -46,7 +46,7 @@ spec:
     spec:
       containers:
       - name: sample-app
-        image: nginx:alpine
+        image: nginx:stable
         ports:
         - containerPort: 80
         # volumeMounts:

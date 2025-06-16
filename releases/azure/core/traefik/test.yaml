@@ -1,90 +1,90 @@
-apiVersion: v1
-kind: Service
-metadata:
-  name: sample-app
-  namespace: internal
-spec:
-  selector:
-    app: sample-app
-  ports:
-  - port: 80
-    targetPort: 80
-    protocol: TCP
-    name: http 
----
-apiVersion: traefik.io/v1alpha1
-kind: IngressRoute
-metadata:
-  name: sample-app
-  namespace: internal
-spec:
-  entryPoints:
-    - websecure
-  routes:
-    - match: Host(`nginx.wush.site`)
-      kind: Rule
-      services:
-        - name: sample-app
-          port: 80
-  tls:
-    secretName: domain-tls
----
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: sample-app
-  namespace: internal
-spec:
-  replicas: 2
-  selector:
-    matchLabels:
-      app: sample-app
-  template:
-    metadata:
-      labels:
-        app: sample-app
-    spec:
-      containers:
-      - name: sample-app
-        image: nginx:stable
-        ports:
-        - containerPort: 80
-        resources:
-          limits:
-            cpu: 100m
-            memory: 128Mi
-          requests:
-            cpu: 50m
-            memory: 64Mi
-      volumes:
-      - name: nginx-content
-        configMap:
-          name: nginx-content
----
-apiVersion: cert-manager.io/v1
-kind: Certificate
-metadata:
-  name: whoami
-  namespace: internal
-spec:
-  secretName: domain-tls
-  dnsNames:
-    - "nginx.wush.site"
-  issuerRef:
-    name: acme
-    kind: Issuer
----
-apiVersion: cert-manager.io/v1
-kind: Issuer
-metadata:
-  name: acme
-  namespace: internal
-spec:
-  acme:
-    server: https://acme-v02.api.letsencrypt.org/directory
-    privateKeySecretRef:
-      name: acme
-    solvers:
-      - http01:
-          ingress:
-            ingressClassName: traefik
+# apiVersion: v1
+# kind: Service
+# metadata:
+#   name: sample-app
+#   namespace: internal
+# spec:
+#   selector:
+#     app: sample-app
+#   ports:
+#   - port: 80
+#     targetPort: 80
+#     protocol: TCP
+#     name: http 
+# ---
+# apiVersion: traefik.io/v1alpha1
+# kind: IngressRoute
+# metadata:
+#   name: sample-app
+#   namespace: internal
+# spec:
+#   entryPoints:
+#     - websecure
+#   routes:
+#     - match: Host(`nginx.wush.site`)
+#       kind: Rule
+#       services:
+#         - name: sample-app
+#           port: 80
+#   tls:
+#     secretName: domain-tls
+# ---
+# apiVersion: apps/v1
+# kind: Deployment
+# metadata:
+#   name: sample-app
+#   namespace: internal
+# spec:
+#   replicas: 2
+#   selector:
+#     matchLabels:
+#       app: sample-app
+#   template:
+#     metadata:
+#       labels:
+#         app: sample-app
+#     spec:
+#       containers:
+#       - name: sample-app
+#         image: nginx:stable
+#         ports:
+#         - containerPort: 80
+#         resources:
+#           limits:
+#             cpu: 100m
+#             memory: 128Mi
+#           requests:
+#             cpu: 50m
+#             memory: 64Mi
+#       volumes:
+#       - name: nginx-content
+#         configMap:
+#           name: nginx-content
+# ---
+# apiVersion: cert-manager.io/v1
+# kind: Certificate
+# metadata:
+#   name: whoami
+#   namespace: internal
+# spec:
+#   secretName: domain-tls
+#   dnsNames:
+#     - "nginx.wush.site"
+#   issuerRef:
+#     name: acme
+#     kind: Issuer
+# ---
+# apiVersion: cert-manager.io/v1
+# kind: Issuer
+# metadata:
+#   name: acme
+#   namespace: internal
+# spec:
+#   acme:
+#     server: https://acme-v02.api.letsencrypt.org/directory
+#     privateKeySecretRef:
+#       name: acme
+#     solvers:
+#       - http01:
+#           ingress:
+#             ingressClassName: traefik

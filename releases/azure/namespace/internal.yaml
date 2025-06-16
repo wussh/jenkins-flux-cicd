@@ -28,3 +28,10 @@ metadata:
   name: knative-serving
   labels:
     pod-security.kubernetes.io/enforce: privileged
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: auth
+  labels:
+    istio-injection: disabled

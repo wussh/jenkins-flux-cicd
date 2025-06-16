@@ -6,7 +6,7 @@ metadata:
   namespace: istio-system
 spec:
   selector:
-    istio: ingressgateway
+    istio: istio-gateway
   servers:
     - port:
         number: 443
@@ -35,7 +35,7 @@ spec:
             prefix: /
       route:
         - destination:
-            host: istio-ingressgateway.istio-system.svc.cluster.local
+            host: istio-gateway.istio-system.svc.cluster.local
             port:
               number: 80
 ---

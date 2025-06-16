@@ -47,7 +47,7 @@ spec:
       proxy:
         autoInject: enabled
     sidecarInjectorWebhook:
-      enableNamespacesByDefault: true
+      enableNamespacesByDefault: false
     telemetry:
       enabled: true
       v2:

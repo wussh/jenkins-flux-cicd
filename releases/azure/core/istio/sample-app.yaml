@@ -34,23 +34,6 @@ spec:
       port: 80
       targetPort: 80 
 ---
-apiVersion: traefik.io/v1alpha1
-kind: IngressRoute
-metadata:
-  name: istio-gateway-route
-  namespace: istio-system
-spec:
-  entryPoints:
-    - web
-    - websecure
-  routes:
-    - match: Host(`istio.wush.site`)
-      kind: Rule
-      services:
-        - name: istio-gateway
-          port: 80
-          passHostHeader: true
----
 apiVersion: networking.istio.io/v1beta1
 kind: Gateway
 metadata:

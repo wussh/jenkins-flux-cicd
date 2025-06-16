@@ -1,93 +1,123 @@
-# apiVersion: apps/v1
-# kind: Deployment
-# metadata:
-#   name: nginx
-#   namespace: internal
-# spec:
-#   replicas: 1
-#   selector:
-#     matchLabels:
-#       app: nginx
-#   template:
-#     metadata:
-#       labels:
-#         app: nginx
-#       annotations:
-#         sidecar.istio.io/inject: "true"
-#     spec:
-#       containers:
-#         - name: nginx
-#           image: nginx:alpine
-#           ports:
-#             - containerPort: 80
-# ---
-# apiVersion: v1
-# kind: Service
-# metadata:
-#   name: nginx
-#   namespace: internal
-# spec:
-#   selector:
-#     app: nginx
-#   ports:
-#     - protocol: TCP
-#       port: 80
-#       targetPort: 80 
-# ---
-# apiVersion: traefik.io/v1alpha1
-# kind: IngressRoute
-# metadata:
-#   name: istio-gateway-route
-#   namespace: istio-system
-# spec:
-#   entryPoints:
-#     - web
-#     - websecure
-#   routes:
-#     - match: Host(`istio.wush.site`)
-#       kind: Rule
-#       services:
-#         - name: istio-gateway
-#           port: 80
-#           passHostHeader: true
-# ---
-# apiVersion: networking.istio.io/v1beta1
-# kind: Gateway
-# metadata:
-#   name: istio-ingressgateway
-#   namespace: istio-system
-# spec:
-#   selector:
-#     app: istio-gateway
-#   servers:
-#   - port:
-#       number: 80
-#       name: http
-#       protocol: HTTP
-#     hosts:
-#     - "istio.wush.site"
-#   - port:
-#       number: 443
-#       name: https
-#       protocol: HTTPS
-#     tls:
-#       mode: PASSTHROUGH
-#     hosts:
-#     - "istio.wush.site"
-# ---
-# apiVersion: networking.istio.io/v1beta1
-# kind: VirtualService
-# metadata:
-#   name: nginx-istio
-#   namespace: internal
-# spec:
-#   hosts:
-#   - "istio.wush.site"
-#   gateways:
-#   - istio-system/istio-ingressgateway
-#   http:
-#   - route:
-#     - destination:
-#         host: nginx.internal.svc.cluster.local
-#         port:
-#           number: 80 
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx
+  namespace: internal
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: nginx
+  template:
+    metadata:
+      labels:
+        app: nginx
+      annotations:
+        sidecar.istio.io/inject: "true"
+    spec:
+      containers:
+        - name: nginx
+          image: nginx:alpine
+          ports:
+            - containerPort: 80
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: nginx
+  namespace: internal
+spec:
+  selector:
+    app: nginx
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 80 
+---
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: istio-gateway-route
+  namespace: istio-system
+spec:
+  entryPoints:
+    - web
+    - websecure
+  routes:
+    - match: Host(`istio.wush.site`)
+      kind: Rule
+      services:
+        - name: istio-gateway
+          port: 80
+          passHostHeader: true
+---
+apiVersion: networking.istio.io/v1beta1
+kind: Gateway
+metadata:
+  name: istio-ingressgateway
+  namespace: istio-system
+spec:
+  selector:
+    app: istio-gateway
+  servers:
+  - port:
+      number: 80
+      name: http
+      protocol: HTTP
+    hosts:
+    - "istio.wush.site"
+  - port:
+      number: 443
+      name: https
+      protocol: HTTPS
+    tls:
+      mode: SIMPLE
+      credentialName: istio-wush-site-tls
+    hosts:
+    - "istio.wush.site"
+---
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: nginx-istio
+  namespace: internal
+spec:
+  hosts:
+  - "istio.wush.site"
+  gateways:
+  - istio-system/istio-ingressgateway
+  http:
+  - route:
+    - destination:
+        host: nginx.internal.svc.cluster.local
+        port:
+          number: 80 
+---
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: letsencrypt-prod
+spec:
+  acme:
+    email: andrianta.321@gmail.com
+    server: https://acme-v02.api.letsencrypt.org/directory
+    privateKeySecretRef:
+      name: letsencrypt-prod
+    solvers:
+    - http01:
+        ingress:
+          class: istio
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: istio-wush-site-cert
+  namespace: istio-system
+spec:
+  secretName: istio-wush-site-tls
+  issuerRef:
+    name: letsencrypt-prod
+    kind: ClusterIssuer
+  commonName: istio.wush.site
+  dnsNames:
+  - istio.wush.site

@@ -1,0 +1,25 @@
+apiVersion: source.toolkit.fluxcd.io/v1beta2
+kind: GitRepository
+metadata:
+  name: flux-repo
+  namespace: flux-system
+spec:
+  interval: 1m
+  url: https://github.com/wussh/terraform-azure-k3s-cluster.git
+  ref:
+    branch: main
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1beta2
+kind: Kustomization
+metadata:
+  name: releases
+  namespace: flux-system
+spec:
+  interval: 5m
+  path: "./releases/azure"
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: flux-repo
+  wait: true
+  timeout: 3m

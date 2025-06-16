@@ -19,7 +19,6 @@ metadata:
   namespace: internal
 spec:
   entryPoints:
-    - web
     - websecure
   routes:
     - match: Host(`nginx.wush.site`)

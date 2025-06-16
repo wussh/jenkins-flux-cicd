@@ -1,0 +1,24 @@
+ apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: http-redirect
+  namespace: istio-system
+spec:
+  hosts:
+  - "istio.wush.site"
+  gateways:
+  - istio-system/istio-ingressgateway
+  http:
+  - match:
+    - uri:
+        prefix: "/.well-known/acme-challenge/"
+    route:
+    - destination:
+        host: cm-acme-http-solver-service.istio-system.svc.cluster.local
+        port:
+          number: 8089
+  - redirect:
+      uri: /
+      authority: istio.wush.site
+      port: 443
+      scheme: https

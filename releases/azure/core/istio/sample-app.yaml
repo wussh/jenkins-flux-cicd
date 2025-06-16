@@ -60,6 +60,22 @@ spec:
     - "istio.wush.site"
 ---
 apiVersion: networking.istio.io/v1beta1
+kind: Gateway
+metadata:
+  name: acme-gateway
+  namespace: istio-system
+spec:
+  selector:
+    app: istio-gateway
+  servers:
+  - port:
+      number: 80
+      name: http
+      protocol: HTTP
+    hosts:
+    - "istio.wush.site"
+---
+apiVersion: networking.istio.io/v1beta1
 kind: VirtualService
 metadata:
   name: nginx-istio
@@ -76,6 +92,26 @@ spec:
         port:
           number: 80 
 ---
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: acme-solver
+  namespace: istio-system
+spec:
+  hosts:
+  - "istio.wush.site"
+  gateways:
+  - istio-system/acme-gateway
+  http:
+  - match:
+    - uri:
+        prefix: "/.well-known/acme-challenge/"
+    route:
+    - destination:
+        host: cm-acme-http-solver-service.istio-system.svc.cluster.local
+        port:
+          number: 8089
+---
 apiVersion: cert-manager.io/v1
 kind: ClusterIssuer
 metadata:
@@ -87,9 +123,22 @@ spec:
     privateKeySecretRef:
       name: letsencrypt-prod
     solvers:
-    - http01:
+    - selector:
+        dnsZones:
+          - "istio.wush.site"
+      http01:
         ingress:
           class: istio
+          podTemplate:
+            spec:
+              containers:
+              - name: acme-http-solver
+                securityContext:
+                  runAsNonRoot: true
+                  runAsUser: 1001
+                  capabilities:
+                    drop:
+                    - ALL
 ---
 apiVersion: cert-manager.io/v1
 kind: Certificate

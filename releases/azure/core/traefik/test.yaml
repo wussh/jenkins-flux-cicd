@@ -1,13 +1,8 @@
 apiVersion: v1
-kind: Namespace
-metadata:
-  name: sample-app 
----
-apiVersion: v1
 kind: Service
 metadata:
   name: sample-app
-  namespace: sample-app
+  namespace: internal
 spec:
   selector:
     app: sample-app
@@ -21,7 +16,7 @@ apiVersion: traefik.io/v1alpha1
 kind: IngressRoute
 metadata:
   name: sample-app
-  namespace: sample-app
+  namespace: internal
 spec:
   entryPoints:
     - websecure
@@ -38,7 +33,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: sample-app
-  namespace: sample-app
+  namespace: internal
 spec:
   replicas: 2
   selector:
@@ -66,7 +61,7 @@ apiVersion: cert-manager.io/v1
 kind: Certificate
 metadata:
   name: whoami
-  namespace: traefik
+  namespace: internal
 spec:
   secretName: domain-tls
   dnsNames:
@@ -79,7 +74,7 @@ apiVersion: cert-manager.io/v1
 kind: Issuer
 metadata:
   name: acme
-  namespace: sample-app
+  namespace: internal
 spec:
   acme:
     server: https://acme-staging-v02.api.letsencrypt.org/directory

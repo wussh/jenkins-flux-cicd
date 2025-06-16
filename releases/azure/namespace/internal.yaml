@@ -1,31 +1,29 @@
-apiVersion: v1
-kind: Namespace
-metadata:
-  name: internal
 ---
 apiVersion: v1
 kind: Namespace
 metadata:
-  name: istio-system
----
-apiVersion: v1
-kind: Namespace
-metadata:
-  name: cert-manager
-  labels:
-    istio-injection: disabled
----
-apiVersion: v1
-kind: Namespace
-metadata:
-  name: oauth2-proxy
+  name: kubeflow
   labels:
     pod-security.kubernetes.io/enforce: privileged
 ---
 apiVersion: v1
 kind: Namespace
 metadata:
-  name: knative-serving
+  name: kubeflow-user-example-com
+  labels:
+    pod-security.kubernetes.io/enforce: privileged
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: kfserving-system
+  labels:
+    pod-security.kubernetes.io/enforce: privileged
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: ml-pipeline
   labels:
     pod-security.kubernetes.io/enforce: privileged
 ---
@@ -34,4 +32,11 @@ kind: Namespace
 metadata:
   name: auth
   labels:
-    istio-injection: disabled
+    pod-security.kubernetes.io/enforce: privileged
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: istio-system
+  labels:
+    pod-security.kubernetes.io/enforce: privileged

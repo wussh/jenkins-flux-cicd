@@ -50,6 +50,9 @@ spec:
         image: nginx:alpine
         ports:
         - containerPort: 80
+        volumeMounts:
+        - name: nginx-content
+          mountPath: /usr/share/nginx/html
         resources:
           limits:
             cpu: 100m
@@ -57,6 +60,38 @@ spec:
           requests:
             cpu: 50m
             memory: 64Mi
+      volumes:
+      - name: nginx-content
+        configMap:
+          name: nginx-content
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nginx-content
+  namespace: internal
+data:
+  index.html: |
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <title>Welcome to Sample App!</title>
+      <style>
+        body {
+          font-family: Arial, sans-serif;
+          margin: 40px;
+          text-align: center;
+        }
+        h1 {
+          color: #333;
+        }
+      </style>
+    </head>
+    <body>
+      <h1>Welcome to Sample App!</h1>
+      <p>This is a sample application served via HTTPS with Traefik and cert-manager.</p>
+    </body>
+    </html>
 ---
 apiVersion: cert-manager.io/v1
 kind: Certificate
@@ -78,7 +113,7 @@ metadata:
   namespace: internal
 spec:
   acme:
-    server: https://acme-staging-v02.api.letsencrypt.org/directory
+    server: https://acme-v02.api.letsencrypt.org/directory
     privateKeySecretRef:
       name: acme
     solvers:

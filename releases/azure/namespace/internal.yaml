@@ -14,3 +14,10 @@ metadata:
   name: cert-manager
   labels:
     istio-injection: disabled
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: oauth2-proxy
+  labels:
+    pod-security.kubernetes.io/enforce: privileged
